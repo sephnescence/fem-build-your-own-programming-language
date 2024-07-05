@@ -99,9 +99,15 @@ describe("Test parse response", () => {
         type: "Expression",
         value: 0,
         expressions: [
-          { type: "Identifier", value: "add" },
-          { type: "NumberLiteral", value: 2 },
-          { type: "NumberLiteral", value: 3 },
+          {
+            type: "Identifier",
+            name: "add",
+            value: 0,
+            expressions: [
+              { type: "NumberLiteral", value: 2 },
+              { type: "NumberLiteral", value: 3 },
+            ],
+          },
         ],
       },
     ];
@@ -128,16 +134,28 @@ describe("Test parse response", () => {
         type: "Expression",
         value: 0,
         expressions: [
-          { type: "Identifier", value: "add" },
-          { type: "NumberLiteral", value: 2 },
-          { type: "NumberLiteral", value: 3 },
           {
-            type: "Expression",
+            type: "Identifier",
+            name: "add",
             value: 0,
             expressions: [
-              { type: "Identifier", value: "subtract" },
-              { type: "NumberLiteral", value: 3 },
               { type: "NumberLiteral", value: 2 },
+              { type: "NumberLiteral", value: 3 },
+              {
+                type: "Expression",
+                value: 0,
+                expressions: [
+                  {
+                    type: "Identifier",
+                    name: "subtract",
+                    value: 0,
+                    expressions: [
+                      { type: "NumberLiteral", value: 3 },
+                      { type: "NumberLiteral", value: 2 },
+                    ],
+                  },
+                ],
+              },
             ],
           },
         ],

@@ -11,11 +11,12 @@ export const parse = ({ input }: { input: Token[] }): Expression[] => {
   let token = input.shift();
 
   while (token !== undefined) {
-    console.log(token.type);
     if (token.type === "Name") {
       expressions.push({
         type: "Identifier",
-        value: token.token,
+        name: token.token as string,
+        value: 0,
+        expressions: parse({ input }),
       });
 
       token = input.shift();
@@ -36,13 +37,11 @@ export const parse = ({ input }: { input: Token[] }): Expression[] => {
 
     if (token.type === "Parenthesis" && token.token === "(") {
       // Opening bracket
-      const expression: Expression = {
+      expressions.push({
         type: "Expression",
         value: 0,
         expressions: parse({ input }),
-      };
-
-      expressions.push(expression);
+      });
 
       token = input.shift();
 
