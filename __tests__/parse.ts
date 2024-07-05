@@ -46,7 +46,7 @@ describe("Test parse response", () => {
     const expected: Expression[] = [
       {
         type: "Expression",
-        value: 4,
+        value: 0,
         expressions: [
           {
             type: "NumberLiteral",
@@ -57,6 +57,32 @@ describe("Test parse response", () => {
     ];
 
     expect(parse({ input })).toEqual(expected);
+  });
+
+  it("should actually shrink the array when shift is called", () => {
+    const input: Token[] = [
+      { type: "Parenthesis", token: "(" },
+      { type: "Name", token: "add" },
+      { type: "Number", token: 2 },
+      { type: "Number", token: 3 },
+      { type: "Parenthesis", token: ")" },
+    ];
+
+    let token = input.shift();
+
+    expect(token).toEqual({ type: "Parenthesis", token: "(" });
+
+    token = input.shift();
+
+    expect(token).toEqual({ type: "Name", token: "add" });
+
+    console.log(input);
+
+    expect(input).toEqual([
+      { type: "Number", token: 2 },
+      { type: "Number", token: 3 },
+      { type: "Parenthesis", token: ")" },
+    ]);
   });
 
   it("Parses an add statement (add 2 3)", () => {
@@ -71,14 +97,16 @@ describe("Test parse response", () => {
     const expected: Expression[] = [
       {
         type: "Expression",
-        value: 4,
+        value: 0,
         expressions: [
-          { type: "Name", value: "add" },
+          { type: "Identifier", value: "add" },
           { type: "NumberLiteral", value: 2 },
           { type: "NumberLiteral", value: 3 },
         ],
       },
     ];
+
+    expect(parse({ input })).toEqual(expected);
   });
 
   it("Parses an add statement with a nest expression (add 2 3 (subtract 3 2))", () => {
@@ -98,13 +126,24 @@ describe("Test parse response", () => {
     const expected: Expression[] = [
       {
         type: "Expression",
-        value: 4,
+        value: 0,
         expressions: [
-          { type: "Name", value: "add" },
+          { type: "Identifier", value: "add" },
           { type: "NumberLiteral", value: 2 },
           { type: "NumberLiteral", value: 3 },
+          {
+            type: "Expression",
+            value: 0,
+            expressions: [
+              { type: "Identifier", value: "subtract" },
+              { type: "NumberLiteral", value: 3 },
+              { type: "NumberLiteral", value: 2 },
+            ],
+          },
         ],
       },
     ];
+
+    expect(parse({ input })).toEqual(expected);
   });
 });

@@ -1,14 +1,6 @@
 import { Expression } from "./types/expressions";
 import { Token } from "./types/token";
 
-const peek = (input: Token[]) => {
-  if (input.length) {
-    return input[0];
-  }
-
-  return null;
-};
-
 export const parse = ({ input }: { input: Token[] }): Expression[] => {
   const expressions: Expression[] = [];
 
@@ -19,6 +11,18 @@ export const parse = ({ input }: { input: Token[] }): Expression[] => {
   let token = input.shift();
 
   while (token !== undefined) {
+    console.log(token.type);
+    if (token.type === "Name") {
+      expressions.push({
+        type: "Identifier",
+        value: token.token,
+      });
+
+      token = input.shift();
+
+      continue;
+    }
+
     if (token.type === "Number") {
       expressions.push({
         type: "NumberLiteral",
@@ -34,7 +38,7 @@ export const parse = ({ input }: { input: Token[] }): Expression[] => {
       // Opening bracket
       const expression: Expression = {
         type: "Expression",
-        value: 4,
+        value: 0,
         expressions: parse({ input }),
       };
 
@@ -46,9 +50,13 @@ export const parse = ({ input }: { input: Token[] }): Expression[] => {
     }
 
     if (token.type === "Parenthesis" && token.token === ")") {
+      token = input.shift();
+
       // Closing bracket
       return expressions;
     }
+
+    throw new Error("Unexpected token");
   }
 
   return expressions;
