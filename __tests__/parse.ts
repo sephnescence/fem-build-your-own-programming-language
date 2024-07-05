@@ -27,7 +27,7 @@ describe("Test parse response", () => {
     expect(parse({ input })).toEqual(expected);
   });
 
-  it.only("Should parse parentheses", () => {
+  it("Should parse parentheses", () => {
     const input: Token[] = [
       {
         type: "Parenthesis",
@@ -57,5 +57,54 @@ describe("Test parse response", () => {
     ];
 
     expect(parse({ input })).toEqual(expected);
+  });
+
+  it("Parses an add statement (add 2 3)", () => {
+    const input: Token[] = [
+      { type: "Parenthesis", token: "(" },
+      { type: "Name", token: "add" },
+      { type: "Number", token: 2 },
+      { type: "Number", token: 3 },
+      { type: "Parenthesis", token: ")" },
+    ];
+
+    const expected: Expression[] = [
+      {
+        type: "Expression",
+        value: 4,
+        expressions: [
+          { type: "Name", value: "add" },
+          { type: "NumberLiteral", value: 2 },
+          { type: "NumberLiteral", value: 3 },
+        ],
+      },
+    ];
+  });
+
+  it("Parses an add statement with a nest expression (add 2 3 (subtract 3 2))", () => {
+    const input: Token[] = [
+      { type: "Parenthesis", token: "(" },
+      { type: "Name", token: "add" },
+      { type: "Number", token: 2 },
+      { type: "Number", token: 3 },
+      { type: "Parenthesis", token: "(" },
+      { type: "Name", token: "subtract" },
+      { type: "Number", token: 3 },
+      { type: "Number", token: 2 },
+      { type: "Parenthesis", token: ")" },
+      { type: "Parenthesis", token: ")" },
+    ];
+
+    const expected: Expression[] = [
+      {
+        type: "Expression",
+        value: 4,
+        expressions: [
+          { type: "Name", value: "add" },
+          { type: "NumberLiteral", value: 2 },
+          { type: "NumberLiteral", value: 3 },
+        ],
+      },
+    ];
   });
 });
