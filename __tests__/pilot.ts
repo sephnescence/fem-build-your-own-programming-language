@@ -21,6 +21,10 @@ const isLetter = ({ token }: { token: string }) => {
   return /[a-zA-Z ]/.test(token);
 };
 
+const isQuote = ({ token }: { token: string }) => {
+  return token === '"';
+};
+
 const tokenise = ({ input }: { input: string }) => {
   const tokens: Token[] = [];
 
@@ -48,6 +52,29 @@ const tokenise = ({ input }: { input: string }) => {
         token,
       });
       cursor++;
+      continue;
+    }
+
+    if (isQuote({ token })) {
+      console.log("Is quote");
+      // Exclude the opening quote
+      let strValue = "";
+
+      while (++cursor < input.length && !isQuote({ token: input[cursor] })) {
+        strValue += input[cursor];
+      }
+
+      if (cursor === input.length && !isQuote({ token: input[cursor] })) {
+        throw new Error("String was never closed");
+      }
+
+      cursor++; // We're excluding the closing quote as well
+
+      tokens.push({
+        type: "String",
+        token: strValue,
+      });
+
       continue;
     }
 
@@ -99,7 +126,7 @@ describe("Test tokenise response", () => {
     expect(tokens).toEqual([]);
   });
 
-  it("Should should accept parentheses", () => {
+  it("Should accept parentheses", () => {
     const tokens = tokenise({ input: "()" });
 
     const expected: Token[] = [
@@ -117,7 +144,7 @@ describe("Test tokenise response", () => {
   });
 
   // Steve ignores whitespace in his example, but surely it should be kept, if only to add to an open String
-  it("Should should accept whitespace", () => {
+  it("Should accept whitespace", () => {
     const tokens = tokenise({ input: " " });
 
     const expected: Token[] = [
@@ -130,7 +157,7 @@ describe("Test tokenise response", () => {
     expect(tokens).toEqual(expected);
   });
 
-  it("Should should accept a mix of numbers and letters", () => {
+  it("Should accept a mix of numbers and letters", () => {
     // Also test the preceding - is dropped
     const tokens = tokenise({ input: "0A" });
 
@@ -148,7 +175,7 @@ describe("Test tokenise response", () => {
     expect(tokens).toEqual(expected);
   });
 
-  it("Should should accept numbers", () => {
+  it("Should accept numbers", () => {
     // Also test the preceding 0 is dropped
     const tokens = tokenise({ input: "01234567890" });
 
@@ -162,7 +189,7 @@ describe("Test tokenise response", () => {
     expect(tokens).toEqual(expected);
   });
 
-  it("Should should accept letters", () => {
+  it("Should accept letters", () => {
     const tokens = tokenise({
       input: "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz",
     });
@@ -172,6 +199,38 @@ describe("Test tokenise response", () => {
         type: "Letter",
         token: "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz",
       },
+    ];
+
+    expect(tokens).toEqual(expected);
+  });
+
+  it("Should accept strings", () => {
+    const tokens = tokenise({
+      input: '"The quick brown fox"',
+    });
+
+    const expected: Token[] = [
+      {
+        type: "String",
+        token: "The quick brown fox",
+      },
+    ];
+
+    expect(tokens).toEqual(expected);
+  });
+
+  // Skipped because the Name type wasn't covered in 6,7, or 8. Did it get edited out?
+  it.skip("should correctly tokenize a simple expression", () => {
+    const tokens = tokenise({
+      input: "(add 2 3)",
+    });
+
+    const expected: Token[] = [
+      { type: "Parenthesis", token: "(" },
+      { type: "Name", token: "add" },
+      { type: "Number", token: 2 },
+      { type: "Number", token: 3 },
+      { type: "Parenthesis", token: ")" },
     ];
 
     expect(tokens).toEqual(expected);
