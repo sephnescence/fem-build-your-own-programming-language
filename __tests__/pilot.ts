@@ -1,6 +1,6 @@
 type Token = {
   type: string;
-  token: string;
+  token: string | number;
 };
 
 const isParenthesis = ({ token }: { token: string }) => {
@@ -9,6 +9,16 @@ const isParenthesis = ({ token }: { token: string }) => {
 
 const isWhitespace = ({ token }: { token: string }) => {
   return /\s/.test(token);
+};
+
+const isNumber = ({ token }: { token: string }) => {
+  return /\d/.test(token);
+};
+
+const isLetter = ({ token }: { token: string }) => {
+  // Allow a space to count as a letter. isWhitespace MUST be called before isLetter
+  // Spaces are only allow in isLetter lookahead
+  return /[a-zA-Z ]/.test(token);
 };
 
 const tokenise = ({ input }: { input: string }) => {
@@ -38,6 +48,40 @@ const tokenise = ({ input }: { input: string }) => {
         token,
       });
       cursor++;
+      continue;
+    }
+
+    if (isNumber({ token })) {
+      // console.log("Is number");
+
+      let number = token;
+
+      while (++cursor < input.length && isNumber({ token: input[cursor] })) {
+        number += input[cursor];
+      }
+
+      tokens.push({
+        type: "Number",
+        token: parseInt(number, 10),
+      });
+
+      continue;
+    }
+
+    if (isLetter({ token })) {
+      // console.log("Is letter");
+
+      let letters = token;
+
+      while (++cursor < input.length && isLetter({ token: input[cursor] })) {
+        letters += input[cursor];
+      }
+
+      tokens.push({
+        type: "Letter",
+        token: letters,
+      });
+
       continue;
     }
 
@@ -80,6 +124,53 @@ describe("Test tokenise response", () => {
       {
         type: "Whitespace",
         token: " ",
+      },
+    ];
+
+    expect(tokens).toEqual(expected);
+  });
+
+  it("Should should accept a mix of numbers and letters", () => {
+    // Also test the preceding - is dropped
+    const tokens = tokenise({ input: "0A" });
+
+    const expected: Token[] = [
+      {
+        type: "Number",
+        token: 0,
+      },
+      {
+        type: "Letter",
+        token: "A",
+      },
+    ];
+
+    expect(tokens).toEqual(expected);
+  });
+
+  it("Should should accept numbers", () => {
+    // Also test the preceding 0 is dropped
+    const tokens = tokenise({ input: "01234567890" });
+
+    const expected: Token[] = [
+      {
+        type: "Number",
+        token: 1234567890,
+      },
+    ];
+
+    expect(tokens).toEqual(expected);
+  });
+
+  it("Should should accept letters", () => {
+    const tokens = tokenise({
+      input: "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz",
+    });
+
+    const expected: Token[] = [
+      {
+        type: "Letter",
+        token: "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz",
       },
     ];
 
